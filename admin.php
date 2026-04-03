@@ -42,7 +42,7 @@ function traduzirTipoUsuario($tipo){
 
         <h2 class="text-center mb-4">Lista de Usuários</h2>
 
-        <!-- 🔍 BUSCA -->
+        <!-- busca -->
         <form method="GET" class="input-group mb-4">
             <input type="text" name="q" class="form-control"
                    placeholder="Pesquisar usuário pelo nome..."
@@ -51,7 +51,7 @@ function traduzirTipoUsuario($tipo){
             <button class="btn btn-primary">Buscar</button>
         </form>
 
-        <!-- FORM CADASTRO -->
+        <!-- formulario cadastro -->
         <h5>Cadastrar Usuário</h5>
 
         <form action="cadastrar_usuario.php" method="POST" class="mb-4">
@@ -86,7 +86,7 @@ function traduzirTipoUsuario($tipo){
 
         <hr>
 
-        <!-- TABELA -->
+        <!-- tabela -->
         <div class="table-responsive">
             <table class="table table-bordered table-striped shadow-sm">
 
