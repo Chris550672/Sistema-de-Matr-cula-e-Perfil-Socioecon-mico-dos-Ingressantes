@@ -6,7 +6,7 @@ define('SENHA', '');
 define('DB', 'sistema_matricula');
 
 // configurações gerais
-define('BASE_URL', 'http://localhost/seu_projeto/'); // Mude para a sua pasta
+define('BASE_URL', 'http://localhost/seu_projeto/'); 
 define('NOME_ESCOLA', 'EEEP MANOEL MANO');
 define('SISTEMA_NOME', 'SisCA');
 
