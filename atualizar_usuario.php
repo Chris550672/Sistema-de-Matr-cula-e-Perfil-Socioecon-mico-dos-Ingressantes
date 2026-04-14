@@ -7,26 +7,25 @@ if(!isset($_SESSION['email']) || $_SESSION['tipoLogin'] != 0){
     exit();
 }
 
-$id    = $_POST['id'];
-$nome  = mysqli_real_escape_string($conexao, trim($_POST['nome']));
-$email = mysqli_real_escape_string($conexao, trim($_POST['email']));
-$senha = trim($_POST['senha']);
-$tipo  = mysqli_real_escape_string($conexao, $_POST['tipo_usuario']);
+$nome = trim($_POST['nome']);
+$email = trim($_POST['email']);
+$senha_pura = $_POST['senha'];
+$tipo = $_POST['tipo_usuario'];
 
-if(!empty($senha)){
-    $senha = mysqli_real_escape_string($conexao, $senha);
-    $sql = "UPDATE usuario 
-            SET nome='$nome', email='$email', senha=MD5('$senha'), tipo_usuario='$tipo'
-            WHERE id_usuario_pk='$id'";
+// 🔐 correto
+$senha_hash = password_hash($senha_pura, PASSWORD_DEFAULT);
+
+$sql = "INSERT INTO usuario (nome, email, senha, tipo_usuario) VALUES (?, ?, ?, ?)";
+$stmt = $conexao->prepare($sql);
+
+$stmt->bind_param("sssi", $nome, $email, $senha_hash, $tipo);
+
+if($stmt->execute()){
+    header('Location: admin.php?sucesso=1');
 } else {
-    $sql = "UPDATE usuario 
-            SET nome='$nome', email='$email', tipo_usuario='$tipo'
-            WHERE id_usuario_pk='$id'";
+    echo "Erro ao cadastrar: " . $conexao->error;
 }
 
-if(mysqli_query($conexao, $sql)){
-    header('Location: admin.php');
-    exit();
-} else {
-    echo "Erro: " . mysqli_error($conexao);
-}
+$stmt->close();
+$conexao->close();
+?>

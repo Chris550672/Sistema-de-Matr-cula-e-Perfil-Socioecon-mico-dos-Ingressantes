@@ -10,10 +10,11 @@ if (empty($_POST['nome']) || empty($_POST['email']) || empty($_POST['senha'])) {
 
 $nome  = mysqli_real_escape_string($conexao, trim($_POST['nome']));
 $email = mysqli_real_escape_string($conexao, trim($_POST['email']));
-$senha = mysqli_real_escape_string($conexao, trim($_POST['senha']));
+$senha = trim($_POST['senha']);
 
 $tipo = 2; 
 
+// Verifica se já existe
 $sql = "SELECT COUNT(*) AS total FROM usuario WHERE email = '$email'";
 $result = mysqli_query($conexao, $sql);
 $row = mysqli_fetch_assoc($result);
@@ -24,8 +25,11 @@ if ($row['total'] > 0) {
     exit();
 }
 
+// 🔐 HASH CORRETO
+$senha_hash = password_hash($senha, PASSWORD_DEFAULT);
+
 $sql = "INSERT INTO usuario (nome, email, senha, tipo_usuario) 
-VALUES ('$nome', '$email', MD5('$senha'), '$tipo')";
+VALUES ('$nome', '$email', '$senha_hash', '$tipo')";
 
 if (mysqli_query($conexao, $sql)) {
     $_SESSION['mensagem'] = "Cadastro realizado com sucesso!";

@@ -2,10 +2,6 @@
 session_start();
 include('conexao.php');
 
-if(!isset($_SESSION['email']) || $_SESSION['tipoLogin'] != 0){
-    header('Location: index.php');
-    exit();
-}
 
 $busca = "";
 $result = null;
