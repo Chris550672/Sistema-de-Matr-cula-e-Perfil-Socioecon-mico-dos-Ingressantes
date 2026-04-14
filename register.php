@@ -41,37 +41,35 @@ session_start();
             font-weight: bold;
         }
 
-        .titulo span { /* esse span serve so pra qnd eu quiser
-                            mexer em uma parte específica de um
-                            texto invés de mexer nele todo */
-            color: #555;
-        }
+        
     </style>
 </head>
 <body>
 
 <div class="titulo">
-    SISTEMA <span>DE MATRÍCULAS</span>
+    SISTEMA DE MATRÍCULAS
 </div>
 
 <div class="container d-flex justify-content-center">
     <div class="box col-md-4 text-center">
 
-        <h4 class="mb-4">Entrar como:</h4>
+        <h4 class="mb-4">Entrar como:</h4> 
 
         <form action="index.php" method="POST">
 
-            <button type="submit" name="tipoLogin" value="0" class="btn btn-dark w-100 mb-3">
+            <button type="submit" name="tipoLogin" value="0" class="btn btn-outline-success w-100 mb-3">
                 Administrador
             </button>
 
-            <button type="submit" name="tipoLogin" value="1" class="btn btn-custom w-100 mb-3">
+            <button type="submit" name="tipoLogin" value="1" class="btn btn-outline-success w-100 mb-3">
                 Coordenador
             </button>
 
-            <button type="submit" name="tipoLogin" value="2" class="btn btn-custom w-100">
+            <button type="submit" name="tipoLogin" value="2" class="btn btn-outline-success w-100">
                 Secretário
             </button>
+            
+
 
         </form>
 

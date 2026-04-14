@@ -7,28 +7,27 @@ if(!isset($_SESSION['email']) || $_SESSION['tipoLogin'] != 0){
     exit();
 }
 
-$nome  = mysqli_real_escape_string($conexao, trim($_POST['nome']));
-$email = mysqli_real_escape_string($conexao, trim($_POST['email']));
-$senha = mysqli_real_escape_string($conexao, trim($_POST['senha']));
-$tipo  = mysqli_real_escape_string($conexao, $_POST['tipo_usuario']);
+$nome = trim($_POST['nome']);
+$email = trim($_POST['email']);
+$senha_pura = $_POST['senha'];
+$tipo = $_POST['tipo_usuario'];
 
-// verifica se o usuario ja existe
-$sql = "SELECT COUNT(*) AS total FROM usuario WHERE email = '$email'";
-$result = mysqli_query($conexao, $sql);
-$row = mysqli_fetch_assoc($result);
+$senha_hash = password_hash($senha_pura, PASSWORD_DEFAULT);
 
-if($row['total'] > 0){
-    echo "Usuário já existe!";
-    exit();
-}
+$sql = "INSERT INTO usuario (nome, email, senha, tipo_usuario) VALUES (?, ?, ?, ?)";
+$stmt = $conexao->prepare($sql);
 
-// insere no banco
-$sql = "INSERT INTO usuario (nome, email, senha, tipo_usuario)
-VALUES ('$nome', '$email', MD5('$senha'), '$tipo')";
+// "sssi" significa string, string, string e integer
+$stmt->bind_param("sssi", $nome, $email, $senha_hash, $tipo);
 
-if(mysqli_query($conexao, $sql)){
-    header('Location: admin.php');
-    exit();
+if($stmt->execute()){
+    
+    header('Location: admin.php?sucesso=1');
 } else {
-    echo "Erro: " . mysqli_error($conexao);
+    
+    echo "Erro ao cadastrar: " . $conexao->error;
 }
+
+$stmt->close();
+$conexao->close();
+?>

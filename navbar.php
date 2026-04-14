@@ -5,7 +5,7 @@ $tipo = $_SESSION['tipoLogin'] ?? null;
 $email = $_SESSION['email'] ?? 'Usuário';
 ?>
 
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+<nav class="navbar navbar-expand-lg navbar-dark bg-success">
     <div class="container-fluid">
 
         <!-- logo / home -->

@@ -2,21 +2,21 @@
 session_start();
 include('conexao.php');
 
-if(!isset($_SESSION['email']) || $_SESSION['tipoLogin'] != 0){
-    header('Location: index.php');
-    exit();
-}
 
 $busca = "";
+$result = null;
 
-if(isset($_GET['q'])){
-    $busca = mysqli_real_escape_string($conexao, $_GET['q']);
-    $sql = "SELECT * FROM usuario WHERE nome LIKE '%$busca%' ORDER BY id_usuario_pk ASC";
+if(isset($_GET['q']) && !empty($_GET['q'])){
+    $busca = $_GET['q'];
+    $param = "%$busca%"; 
+    
+    $stmt = $conexao->prepare("SELECT * FROM usuario WHERE nome LIKE ? ORDER BY id_usuario_pk ASC");
+    $stmt->bind_param("s", $param); // "s" de string
+    $stmt->execute();
+    $result = $stmt->get_result();
 } else {
-    $sql = "SELECT * FROM usuario ORDER BY id_usuario_pk ASC";
+    $result = $conexao->query("SELECT * FROM usuario ORDER BY id_usuario_pk ASC");
 }
-
-$result = mysqli_query($conexao, $sql);
 
 function traduzirTipoUsuario($tipo){
     if($tipo == 0) return "Admin";
@@ -26,10 +26,12 @@ function traduzirTipoUsuario($tipo){
 ?>
 
 <!DOCTYPE html>
-<html>
+<html lang="pt-br">
 <head>
-    <title>Painel Admin</title>
+    <meta charset="UTF-8">
+    <title>Painel Admin - <?php echo SISTEMA_NOME; ?></title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.0/font/bootstrap-icons.css">
 </head>
 
 <body class="bg-light">
@@ -37,122 +39,76 @@ function traduzirTipoUsuario($tipo){
 <?php include('navbar.php'); ?>
 
 <div class="container my-4">
+    <div class="text-center mb-4">
+        <h1 class="fw-bold text-success"><?php echo NOME_ESCOLA; ?></h1>
+        <p class="text-muted">Gestão de Usuários do <?php echo SISTEMA_NOME; ?></p>
+    </div>
 
-    <div class="card shadow p-4">
+    <div class="card shadow border-0 p-4">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="h4 mb-0">Lista de Usuários</h2>
+            <a href="form_usuario.php" class="btn btn-success">
+                <i class="bi bi-person-plus-fill"></i> Novo Usuário
+            </a>
+        </div>
 
-        <h2 class="text-center mb-4">Lista de Usuários</h2>
-
-        <!-- busca -->
-        <form method="GET" class="input-group mb-4">
-            <input type="text" name="q" class="form-control"
-                   placeholder="Pesquisar usuário pelo nome..."
-                   value="<?php echo htmlspecialchars($busca); ?>">
-
-            <button class="btn btn-primary">Buscar</button>
+        <form method="GET" action="admin.php" class="mb-4">
+            <div class="input-group">
+                <input type="text" name="q" class="form-control" placeholder="Buscar por nome..." value="<?php echo htmlspecialchars($busca); ?>">
+                <button class="btn btn-primary" type="submit">
+                    <i class="bi bi-search"></i> Pesquisar
+                </button>
+                <?php if(!empty($busca)): ?>
+                    <a href="admin.php" class="btn btn-outline-secondary">Limpar</a>
+                <?php endif; ?>
+            </div>
         </form>
 
-        <!-- formulario cadastro -->
-        <h5>Cadastrar Usuário</h5>
-
-        <form action="cadastrar_usuario.php" method="POST" class="mb-4">
-
-            <div class="row">
-                <div class="col-md-6">
-                    <input class="form-control mb-2" type="text" name="nome" placeholder="Nome" required>
-                </div>
-
-                <div class="col-md-6">
-                    <input class="form-control mb-2" type="email" name="email" placeholder="Email" required>
-                </div>
-            </div>
-
-            <div class="row">
-                <div class="col-md-6">
-                    <input class="form-control mb-2" type="password" name="senha" placeholder="Senha" required>
-                </div>
-
-                <div class="col-md-6">
-                    <select class="form-control mb-2" name="tipo_usuario" required>
-                        <option value="">Tipo de usuário</option>
-                        <option value="1">Coordenador</option>
-                        <option value="2">Secretário</option>
-                    </select>
-                </div>
-            </div>
-
-            <button class="btn btn-success w-100">Cadastrar</button>
-
-        </form>
-
-        <hr>
-
-        <!-- tabela -->
         <div class="table-responsive">
-            <table class="table table-bordered table-striped shadow-sm">
-
-                <thead class="table-dark text-center">
+            <table class="table table-hover align-middle">
+                <thead class="table-dark">
                     <tr>
                         <th>ID</th>
                         <th>Nome</th>
-                        <th>Email</th>
-                        <th>Tipo</th>
-                        <th>Ações</th>
+                        <th>E-mail</th>
+                        <th>Nível de Acesso</th>
+                        <th class="text-center">Ações</th>
                     </tr>
                 </thead>
-
-                <tbody class="text-center">
-
-                <?php if(mysqli_num_rows($result) > 0): ?>
-
-                    <?php while($user = mysqli_fetch_assoc($result)): ?>
-
+                <tbody>
+                    <?php while($user = $result->fetch_assoc()): ?>
                     <tr>
                         <td><?php echo $user['id_usuario_pk']; ?></td>
-                        <td><?php echo htmlspecialchars($user['nome']); ?></td>
-                        <td><?php echo htmlspecialchars($user['email']); ?></td>
-
+                        <td class="fw-bold"><?php echo $user['nome']; ?></td>
+                        <td><?php echo $user['email']; ?></td>
                         <td>
-                            <span class="badge bg-secondary">
+                            <span class="badge <?php echo ($user['tipo_usuario'] == 0) ? 'bg-danger' : 'bg-info'; ?>">
                                 <?php echo traduzirTipoUsuario($user['tipo_usuario']); ?>
                             </span>
                         </td>
-
-                        <td>
-                            <a href="editar_usuario.php?id=<?php echo $user['id_usuario_pk']; ?>" 
-                               class="btn btn-sm btn-primary">Editar</a>
-
-                            <a href="excluir.php?id=<?php echo $user['id_usuario_pk']; ?>" 
-                               class="btn btn-sm btn-danger"
-                               onclick="return confirm('Deseja realmente excluir?')">
-                               Excluir
+                        <td class="text-center">
+                            <a href="editar_usuario.php?id=<?php echo $user['id_usuario_pk']; ?>" class="btn btn-sm btn-warning">
+                                <i class="bi bi-pencil"></i>
                             </a>
+                            <button class="btn btn-sm btn-danger" onclick="confirmarExclusao(<?php echo $user['id_usuario_pk']; ?>)">
+                                <i class="bi bi-trash"></i>
+                            </button>
                         </td>
                     </tr>
-
                     <?php endwhile; ?>
-
-                <?php else: ?>
-
-                    <tr>
-                        <td colspan="5" class="text-danger text-center">
-                            Nenhum usuário encontrado!
-                        </td>
-                    </tr>
-
-                <?php endif; ?>
-
                 </tbody>
             </table>
         </div>
-
-        <a href="logout.php" class="btn btn-secondary w-100 mt-3">Sair</a>
-
     </div>
-
 </div>
 
 <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
-
+<script>
+function confirmarExclusao(id) {
+    if(confirm('Tem certeza que deseja excluir este usuário?')) {
+        window.location.href = 'excluir_usuario.php?id=' + id;
+    }
+}
+</script>
 </body>
-<nav class="navbar navbar-expand-lg navbar-dark bg-dark shadow">
 </html>

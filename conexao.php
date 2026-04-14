@@ -1,8 +1,12 @@
 <?php
-define('HOST', 'localhost'); 
-define('USUARIO', 'root');
-define('SENHA', '');
-define('DB', 'sistema_matricula');
+require_once 'config.php';
 
-$conexao = mysqli_connect(HOST, USUARIO, SENHA, DB) or die('Não foi possível conectar');
+$conexao = new mysqli(HOST, USUARIO, SENHA, DB);
+
+if ($conexao->connect_error) {
+    die("Falha na conexão: " . $conexao->connect_error);
+}
+
+// definindo o padrão de caracteres para não dar erro em acentos
+$conexao->set_charset("utf8mb4");
 ?>
