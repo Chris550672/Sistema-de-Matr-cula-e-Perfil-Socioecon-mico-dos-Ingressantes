@@ -8,11 +8,11 @@ if($pagina_atual < 1) $pagina_atual = 1;
 
 $offset = ($pagina_atual - 1) * $itens_por_pagina;
 
-$resultado_total = $conexao->query("SELECT COUNT(*) as total FROM Aluno");
+$resultado_total = $conexao->query("SELECT COUNT(*) as total FROM aluno");
 $total_alunos = $resultado_total->fetch_assoc()['total'];
 $total_paginas = ceil($total_alunos / $itens_por_pagina);
 
-$stmt = $conexao->prepare("SELECT * FROM Aluno ORDER BY nome ASC LIMIT ? OFFSET ?");
+$stmt = $conexao->prepare("SELECT * FROM aluno ORDER BY nome ASC LIMIT ? OFFSET ?");
 $stmt->bind_param("ii", $itens_por_pagina, $offset);
 $stmt->execute();
 $alunos = $stmt->get_result();
